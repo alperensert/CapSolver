@@ -1,0 +1,21 @@
+name: Publish to NuGet Package Registry
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "6.x"
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Pack the Package
+        run: dotnet pack ./CaptchaAI/CaptchaAI.csproj --configuration Release -p:PackageVersion=${{ github.event.release.tag_name }}
+      - name: PushNuget
+        run: dotnet nuget push **/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_PUBLISH_KEY }} --skip-duplicate
