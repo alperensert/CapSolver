@@ -16,6 +16,6 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Pack the Package
-        run: dotnet pack ./CaptchaAI/CaptchaAI.csproj --configuration Release -p:PackageVersion=${{ github.event.release.tag_name }}
+        run: dotnet pack ./CapSolver/CapSolver.csproj --configuration Release -p:PackageVersion=${{ github.event.release.tag_name }}
       - name: PushNuget
         run: dotnet nuget push **/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_PUBLISH_KEY }} --skip-duplicate

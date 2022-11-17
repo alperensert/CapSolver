@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>CapSolver</PackageId> 
+    <Version>1.0.0-alpha</Version> 
+    <Authors>Alperen Sert</Authors> 
+    <Company>Alperen Sert</Company> 
+    <PackageTags>CapSolver,ReCaptcha v2 solver, Bypass captcha, anti-captcha,</PackageTags> 
+    <Description>CapSolver.com Library for .NET Core</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/alperensert/CapSolver</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/alperensert/CapSolver</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RespositoryType>git</RespositoryType>
+</PropertyGroup>
+<ItemGroup>
+  <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  <None Include="../README.md" Pack="true" PackagePath="\"/>
+</ItemGroup>
+</Project>
