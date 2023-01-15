@@ -31,8 +31,12 @@ For projects that support PackageReference, copy this XML node into the project 
 - FunCaptcha Classification
 - GeeTest
 - Datadome Slider
+- Anti Cloud Flare
+- Mt Captcha
+- Binance Captcha
+- AWS WAF Classification
 - Anti Kasada
-- ANti Akamai BMP
+- Anti Akamai BMP
 
 ### Usage Examples
 ---
