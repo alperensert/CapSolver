@@ -5,7 +5,9 @@ namespace CapSolver.Models.Responses;
 
 public class MtCaptchaResponse : ITaskResponse
 {
-    [JsonRequired]
     [JsonProperty("token")]
-    public string Token { get; set; } = null!;
+    public string Token { get; set; }
+
+    [JsonProperty("userAgent")]
+    public string UserAgent { get; set; }
 }

@@ -14,20 +14,22 @@ public class ReCaptchaV2Task : ITask, IUserAgentTask, ICookieTask, IProxyTask
     /// <summary>
     /// Address of a webpage with Google ReCaptcha
     /// </summary>
+    [JsonRequired]
     [JsonProperty("websiteURL")]
-    private string WebsiteUrl { get; set; }
+    public string WebsiteUrl { get; set; } = null!;
 
     /// <summary>
     /// Recaptcha website key. <div class="g-recaptcha" data-sitekey="THAT_ONE"></div>
     /// </summary>
+    [JsonRequired]
     [JsonProperty("websiteKey")]
-    private string WebsiteKey { get; set; }
+    public string WebsiteKey { get; set; } = null!;
 
     /// <summary>
     /// Specify whether or not Recaptcha is invisible.
     /// </summary>
     [JsonProperty("isInvisible", NullValueHandling = NullValueHandling.Ignore)]
-    private bool? IsInvisible { get; set; }
+    public bool? IsInvisible { get; set; }
 
     /// <summary>
     /// Browser's User-Agent which is used in emulation. It is required that you use a signature of a modern browser, otherwise Google will ask you to "update your browser".

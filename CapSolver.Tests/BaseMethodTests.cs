@@ -7,9 +7,8 @@ public class BaseMethodTests
     {
         var client = new CapSolverClient(Environment.GetEnvironmentVariable("APIKEY")!, false);
         float balance = await client.GetBalance();
-        Assert.NotNull(balance);
         Assert.IsType<float>(balance);
-        Assert.True(default (float) != balance);
+        Assert.True(default != balance);
     }
 
     [Fact]

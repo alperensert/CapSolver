@@ -90,7 +90,7 @@ public class CapSolverClient
         {
             JObject vt = JObject.FromObject(t);
             JObject t_ = JObject.FromObject(task);
-            t_["type"] += "Proxyless";
+            t_["type"] += "ProxyLess";
             vt["task"] = t_;
             data = vt.ToString();
         }

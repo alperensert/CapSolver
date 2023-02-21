@@ -27,7 +27,7 @@ public class FunCaptchaTask : ITask, IProxyTask, IUserAgentTask
     /// A special subdomain of funcaptcha.com, from which the JS captcha widget should be loaded. Most FunCaptcha installations work from shared domains.
     /// </summary>
     [JsonProperty("funcaptchaApiJSSubdomain")]
-    public string ApiJsSubdomain { get; set; }
+    public string? ApiJsSubdomain { get; set; }
 
     /// <summary>
     /// Additional parameter that may be required by FunCaptcha implementation. Use this property to send "blob" value as a stringified array. See example how it may look like. 
@@ -51,7 +51,7 @@ public class FunCaptchaTask : ITask, IProxyTask, IUserAgentTask
     /// <param name="data">Additional parameter that may be required by FunCaptcha implementation. Use this property to send "blob" value as a stringified array. See example how it may look like. </param>
     public FunCaptchaTask(string websiteUrl,
                           string websitePublicKey,
-                          string apiJsSubdomain,
+                          string? apiJsSubdomain = null,
                           string? data = null,
                           string? userAgent = null)
     {

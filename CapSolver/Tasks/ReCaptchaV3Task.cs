@@ -51,6 +51,18 @@ public class ReCaptchaV3Task : ITask, IProxyTask, IUserAgentTask, ICookieTask
     public string? Cookies { get; set; }
 
     /// <summary>
+    /// Enterprise payload
+    /// </summary>
+    [JsonProperty("enterprisePayload", NullValueHandling = NullValueHandling.Ignore)]
+    public object? EnterprisePayload { get; set; }
+
+    /// <summary>
+    /// Domain address from which to load reCAPTCHA Enterprise.
+    /// </summary>
+    [JsonProperty("apiDomain", NullValueHandling = NullValueHandling.Ignore)]
+    public string? ApiDomain { get; set; }
+
+    /// <summary>
     /// Prepare a ReCaptchaV3 task.
     /// </summary>
     /// <param name="websiteUrl">Address of a webpage with Google ReCaptcha </param>
@@ -64,13 +76,21 @@ public class ReCaptchaV3Task : ITask, IProxyTask, IUserAgentTask, ICookieTask
                            string pageAction,
                            double? minimumScore = null,
                            string? cookies = null,
-                           string? userAgent = null)
+                           string? userAgent = null,
+                           object? enterprisePayload = null,
+                           string? apiDomain = null)
     {
         WebsiteKey = websiteKey;
         WebsiteUrl = websiteUrl;
         PageAction = pageAction;
         MinimumScore = minimumScore;
         UserAgent = userAgent;
+        EnterprisePayload = enterprisePayload;
+        ApiDomain = apiDomain;
         Cookies = cookies;
+        if (enterprisePayload != null)
+        {
+            Type = "ReCaptchaV3EnterpriseTask";
+        }
     }
 }
