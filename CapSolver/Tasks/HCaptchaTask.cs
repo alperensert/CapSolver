@@ -9,7 +9,7 @@ namespace CapSolver.Tasks;
 public class HCaptchaTask : ITask, IProxyTask, IUserAgentTask
 {
     [JsonProperty("type")]
-    private readonly string Type = "HCaptchaTask";
+    protected string Type = "HCaptchaTask";
 
     /// <summary>
     /// Address of a webpage with hCaptcha

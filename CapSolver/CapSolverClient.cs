@@ -9,60 +9,55 @@ namespace CapSolver;
 
 public class CapSolverClient
 {
-    private readonly static string Balance = "/getBalance";
-    private readonly static string CreateTask_ = "/createTask";
-    private readonly static string GetTaskResult_ = "/getTaskResult";
-    private readonly static string CreateTaskKasada = "/kasada/invoke";
-    private readonly static string CreateTaskAntiAkamai = "/akamaibmp/invoke";
-    private HttpClient _httpClient;
-    private readonly static Uri _hostUrl = new Uri("https://api.capsolver.com");
-    private readonly static Uri _betaHostUrl = new Uri("https://api-beta.capsolver.com");
+    private readonly HttpClient _httpClient;
+    private static readonly Uri HostUrl = new Uri("https://api.capsolver.com");
+    private static readonly Uri BetaHostUrl = new Uri("https://api-beta.capsolver.com");
     private readonly string _clientKey;
-    private Proxy? _proxy = null;
+    private Proxy? _proxy;
 
     public CapSolverClient(string clientKey, bool beta = false)
     {
         _clientKey = clientKey;
-        _httpClient = new HttpClient { BaseAddress = beta ? _betaHostUrl : _hostUrl };
+        _httpClient = new HttpClient { BaseAddress = beta ? BetaHostUrl : HostUrl };
     }
 
     public async Task<float> GetBalance()
     {
-        VanillaTask data = new VanillaTask(_clientKey);
-        HttpResponseMessage response = await MakeRequest(Balance, JsonConvert.SerializeObject(data));
-        var r = JsonConvert.DeserializeObject<GetBalance>(await response.Content.ReadAsStringAsync());
-        r = await CheckResponse<GetBalance>(response);
-        return r!.Balance;
+        var data = new VanillaTask(_clientKey);
+        var response = await MakeRequest(Endpoints.Balance, JsonConvert.SerializeObject(data));
+        var r = await CheckResponse<GetBalance>(response);
+        return r.Balance;
     }
 
     public async Task<List<string?>> GetPackages()
     {
-        VanillaTask data = new VanillaTask(_clientKey);
-        HttpResponseMessage response = await MakeRequest(Balance, JsonConvert.SerializeObject(data));
-        var r = JsonConvert.DeserializeObject<GetBalance>(await response.Content.ReadAsStringAsync());
-        r = await CheckResponse<GetBalance>(response);
-        return r!.Packages;
+        var data = new VanillaTask(_clientKey);
+        var response = await MakeRequest(Endpoints.Balance, JsonConvert.SerializeObject(data));
+        var r = await CheckResponse<GetBalance>(response);
+        return r.Packages;
     }
 
     public async Task<TaskResponse<T>> GetTaskResult<T>(string taskId) where T : ITaskResponse
     {
-        VanillaTask vt = new VanillaTask(_clientKey);
-        vt.TaskId = taskId;
-        HttpResponseMessage response = await MakeRequest(GetTaskResult_, JsonConvert.SerializeObject(vt));
-        var r = JsonConvert.DeserializeObject<TaskResponse<T>>(await response.Content.ReadAsStringAsync());
-        r = await CheckResponse<TaskResponse<T>>(response);
+        var vt = new VanillaTask(_clientKey)
+        {
+            TaskId = taskId
+        };
+        var response = await MakeRequest(Endpoints.GetTaskResult, JsonConvert.SerializeObject(vt));
+        var r = await CheckResponse<TaskResponse<T>>(response);
         return r;
     }
 
     public async Task<T> JoinTaskResult<T>(string taskId, int maximumTime = 120) where T : ITaskResponse
     {
-        VanillaTask vt = new VanillaTask(_clientKey);
-        vt.TaskId = taskId;
-        for (int i = 0; i < maximumTime; i++)
+        var vt = new VanillaTask(_clientKey)
         {
-            HttpResponseMessage response = await MakeRequest(GetTaskResult_, JsonConvert.SerializeObject(vt));
-            var r = JsonConvert.DeserializeObject<TaskResponse<T>>(await response.Content.ReadAsStringAsync());
-            r = await CheckResponse<TaskResponse<T>>(response);
+            TaskId = taskId
+        };
+        for (var i = 0; i < maximumTime; i++)
+        {
+            var response = await MakeRequest(Endpoints.GetTaskResult, JsonConvert.SerializeObject(vt));
+            var r = await CheckResponse<TaskResponse<T>>(response);
             if (IsReady(r) && r.Solution != null)
             {
                 return r.Solution;
@@ -74,42 +69,47 @@ public class CapSolverClient
 
     public async Task<string> CreateTask(ITask task)
     {
-        VanillaTask t = new VanillaTask(_clientKey);
+        var t = new VanillaTask(_clientKey);
         t.UseAppId();
         string data;
-        if (task is IProxyTask && IsProxyActive())
+        switch (task)
         {
-            JObject vt = JObject.FromObject(t);
-            JObject t_ = JObject.FromObject(task);
-            JObject p = JObject.FromObject(_proxy!);
-            p.Merge(t_);
-            vt["task"] = p;
-            data = vt.ToString();
+            case IProxyTask when IsProxyActive():
+            {
+                var vt = JObject.FromObject(t);
+                var to = JObject.FromObject(task);
+                var p = JObject.FromObject(_proxy!);
+                p.Merge(to);
+                vt["task"] = p;
+                data = vt.ToString();
+                break;
+            }
+            case IProxyTask when !IsProxyActive():
+            {
+                var vt = JObject.FromObject(t);
+                var to = JObject.FromObject(task);
+                to["type"] += "ProxyLess";
+                vt["task"] = to;
+                data = vt.ToString();
+                break;
+            }
+            default:
+            {
+                var vt = JObject.FromObject(t);
+                var to = JObject.FromObject(task);
+                vt["task"] = to;
+                data = vt.ToString();
+                break;
+            }
         }
-        else if (task is IProxyTask && !IsProxyActive())
+        var method = task switch
         {
-            JObject vt = JObject.FromObject(t);
-            JObject t_ = JObject.FromObject(task);
-            t_["type"] += "ProxyLess";
-            vt["task"] = t_;
-            data = vt.ToString();
-        }
-        else
-        {
-            JObject vt = JObject.FromObject(t);
-            JObject t_ = JObject.FromObject(task);
-            vt["task"] = t_;
-            data = vt.ToString();
-        }
-        string method = CreateTask_;
-        if (task is AntiAkamaiBMPTask)
-        {
-            method = CreateTaskAntiAkamai;
-        }
-        else if (task is AntiKasadaTask)
-        {
-            method = CreateTaskKasada;
-        }
+            AntiAkamaiBMPTask => Endpoints.CreateTaskAntiAkamai,
+            AntiKasadaTask => Endpoints.CreateTaskKasada,
+            _ => Endpoints.CreateTask
+        };
+        if (task is HCaptchaTurboTask && IsProxyActive() == false)
+            throw new CapSolverException(13, "PROXY_NEEDED", "HCaptchaTurboTask requires your own proxies.");
         var r = await CheckResponse<CreateTaskResponse>(await MakeRequest(method, data));
         return r.TaskId;
     }
